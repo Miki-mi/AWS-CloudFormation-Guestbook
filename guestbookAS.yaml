@@ -69,12 +69,13 @@ Resources:
   guestbookASConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: ami-05dc3394926f77227 #img id dari AMI
+      ImageId: ami-0d8b36bc67292106f #img id dari AMI
       SecurityGroups:
         - Fn::ImportValue:
             !Sub ${NetworkStackName}-WebSecurityGroup
       # - Ref: logicalName
       # - web-sg
+      IamInstanceProfile: arn:aws:iam::547558834856:instance-profile/CodeDeployDemo-EC2-Instance-Profile
       InstanceType: t3.micro
       UserData:
         Fn::Base64: !Sub
@@ -84,14 +85,15 @@ Resources:
             sed -i.bak -e 's/user.*/user=admin/' ~/../var/www/html/AWS-PBL-Guestbook/database/db_params.ini
             sed -i.bak -e 's/password.*/password=Guestbook/' ~/../var/www/html/AWS-PBL-Guestbook/database/db_params.ini
             sed -i.bak -e 's/dbname.*/dbname=guestbookDB/' ~/../var/www/html/AWS-PBL-Guestbook/database/db_params.ini
-            sed -i.bak -e 's/login.*/login=https://alpacagb.auth.us-west-2.amazoncognito.com/login?client_id=4fkfahl6380ek2ssqr591ntoge&response_type=token&scope=email+openid+profile&redirect_uri=https://guestbookELB-1363989527.us-west-2.elb.amazonaws.com/home.php/' ~/../var/www/html/AWS-PBL-Guestbook/param.ini
-            sed -i.bak -e 's/signup.*/signup=https://alpacagb.auth.us-west-2.amazoncognito.com/signup?client_id=4fkfahl6380ek2ssqr591ntoge&response_type=token&scope=email+openid+profile&redirect_uri=https://guestbookELB-1363989527.us-west-2.elb.amazonaws.com/home.php/' ~/../var/www/html/AWS-PBL-Guestbook/param.ini
+            # sed -i.bak -e 's/login=.*/login="https:\/\/alpacagb.auth.us-west-2.amazoncognito.com\/login?client_id=2l47n0kdnecfkdk7hrfbtq7kc1\&response_type=token\&scope=email+openid+profile\&redirect_uri=https:\/\/guestbookELB-165438594.us-west-2.elb.amazonaws.com\/home.php"/' ~/../var/www/html/AWS-PBL-Guestbook/param.ini 
+            # sed -i.bak -e 's/signup=.*/signup="https:\/\/alpacagb.auth.us-west-2.amazoncognito.com\/signup?client_id=2l47n0kdnecfkdk7hrfbtq7kc1\&response_type=token\&scope=email+openid+profile\&redirect_uri=https:\/\/guestbookELB-165438594.us-west-2.elb.amazonaws.com\/home.php"/' ~/../var/www/html/AWS-PBL-Guestbook/param.ini
             cd ~/../..
             mysql -u admin --password=Guestbook -h ${dbhostname} < var/www/html/AWS-PBL-Guestbook/database/guestbook.sql
+            cp ~/../var/www/html/AWS-PBL-Guestbook/database/db_params.ini ~/../var/www/html/
           - dbhostname  : 
               Fn::ImportValue:
-                !Sub ${databaseStackName}-guestbookDBHostname
-                
+                !Sub ${databaseStackName}-guestbookDBHostname 
+
   guestbookASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
